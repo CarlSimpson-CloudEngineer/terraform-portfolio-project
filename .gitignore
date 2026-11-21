@@ -1,0 +1,4 @@
+# Terraform - never commit state, local plugins or variable files
+.terraform/
+*.tfstate*
+*.tfvars

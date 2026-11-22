@@ -41,3 +41,62 @@ resource "aws_s3_bucket_lifecycle_configuration" "site" {
 
     depends_on =[aws_s3_bucket_versioning.site]
 }
+
+# Adding CloudFront's identity for reading private bucket 
+resource "aws_cloudfront_origin_access_control" "site" {
+  name                      = "nextjs-site-oac"
+  origin_access_control_origin_type = "s3"
+  signing_behavior         = "always"
+  signing_protocol          = "sigv4"
+}
+
+# Global CDN in front of the private bucket: HTTPS for visitors, files cached at edge locations.
+resource "aws_cloudfront_distribution" "site" {
+    enabled            = true
+    default_root_object = "index.html"
+
+    origin {
+        domain_name              = aws_s3_bucket.site.bucket_regional_domain_name
+        origin_id                = "s3-site"
+        origin_access_control_id = aws_cloudfront_origin_access_control.site.id
+    }
+
+    default_cache_behavior {
+        target_origin_id   = "s3-site"
+        viewer_protocol_policy = "redirect-to-https"
+        allowed_methods         =  ["GET","HEAD"]
+        cached_methods          =  ["GET","HEAD"]
+        compress                = true
+        cache_policy_id         = "658327ea-f89d-4fab-a63d-7e88639e58f6" # AWS managed: CachingOptimized
+    }
+
+    restrictions {
+        geo_restriction {
+            restriction_type = "none"
+        }
+    }
+
+    viewer_certificate {
+        cloudfront_default_certificate = true
+    }
+}
+
+# Only this CloudFront distribution may read the site files. Nobody else.
+resource "aws_s3_bucket_policy" "site" {
+  bucket = aws_s3_bucket.site.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid       = "AllowCloudFrontReadOnly"
+      Effect    = "Allow"
+      Principal = { Service = "cloudfront.amazonaws.com" }
+      Action    = "s3:GetObject"
+      Resource  = "${aws_s3_bucket.site.arn}/*"
+      Condition = {
+        StringEquals = {
+          "AWS:SourceArn" = aws_cloudfront_distribution.site.arn
+        }
+      }
+    }]
+  })
+}

@@ -4,7 +4,7 @@ provider "aws" {
 
 # Private bucket for James's site files. Only CloudFront will be allowed to read it (added later)
 resource "aws_s3_bucket" "site" {
-  bucket = "nextjs-site-s3"
+  bucket        = "nextjs-site-s3"
   force_destroy = true
 }
 
@@ -21,65 +21,66 @@ resource "aws_s3_bucket_public_access_block" "Nextjs_bucket_public_access_block"
 resource "aws_s3_bucket_versioning" "site" {
   bucket = aws_s3_bucket.site.id
   versioning_configuration {
-    status= "Enabled"
+    status = "Enabled"
   }
 }
 
 # Delete old versions after 30 days so they don't drive up cost
 resource "aws_s3_bucket_lifecycle_configuration" "site" {
-    bucket  = aws_s3_bucket.site.id
+  bucket = aws_s3_bucket.site.id
 
-    rule {
-      id   = "expire-old-versions"
-      status = "Enabled"
+  rule {
+    id     = "expire-old-versions"
+    status = "Enabled"
 
-      filter {}
+    filter {}
 
-      noncurrent_version_expiration {
-        noncurrent_days = 30
-      }
+    noncurrent_version_expiration {
+      noncurrent_days = 30
     }
+  }
 
-    depends_on =[aws_s3_bucket_versioning.site]
+  depends_on = [aws_s3_bucket_versioning.site]
 }
 
 # Adding CloudFront's identity for reading private bucket 
 resource "aws_cloudfront_origin_access_control" "site" {
-  name                      = "nextjs-site-oac"
+  name                              = "nextjs-site-oac"
   origin_access_control_origin_type = "s3"
-  signing_behavior         = "always"
-  signing_protocol          = "sigv4"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
 }
 
 # Global CDN in front of the private bucket: HTTPS for visitors, files cached at edge locations.
 resource "aws_cloudfront_distribution" "site" {
-    enabled            = true
-    default_root_object = "index.html"
+  enabled             = true
+  default_root_object = "index.html"
 
-    origin {
-        domain_name              = aws_s3_bucket.site.bucket_regional_domain_name
-        origin_id                = "s3-site"
-        origin_access_control_id = aws_cloudfront_origin_access_control.site.id
-    }
+  origin {
+    domain_name              = aws_s3_bucket.site.bucket_regional_domain_name
+    origin_id                = "s3-site"
+    origin_access_control_id = aws_cloudfront_origin_access_control.site.id
+  }
 
-    default_cache_behavior {
-        target_origin_id   = "s3-site"
-        viewer_protocol_policy = "redirect-to-https"
-        allowed_methods         =  ["GET","HEAD"]
-        cached_methods          =  ["GET","HEAD"]
-        compress                = true
-        cache_policy_id         = "658327ea-f89d-4fab-a63d-7e88639e58f6" # AWS managed: CachingOptimized
-    }
+  default_cache_behavior {
+    target_origin_id          = "s3-site"
+    viewer_protocol_policy    = "redirect-to-https"
+    allowed_methods           = ["GET", "HEAD"]
+    cached_methods            = ["GET", "HEAD"]
+    compress                  = true
+    cache_policy_id           = "658327ea-f89d-4fab-a63d-7e88639e58f6" # AWS managed: CachingOptimized
+    response_headers_policy_id = "67f7725c-6f97-4210-82d7-5512b31e9d03" # AWS managed: SecurityHeadersPolicy
+  }
 
-    restrictions {
-        geo_restriction {
-            restriction_type = "none"
-        }
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
     }
+  }
 
-    viewer_certificate {
-        cloudfront_default_certificate = true
-    }
+  viewer_certificate {
+    cloudfront_default_certificate = true
+  }
 }
 
 # Only this CloudFront distribution may read the site files. Nobody else.

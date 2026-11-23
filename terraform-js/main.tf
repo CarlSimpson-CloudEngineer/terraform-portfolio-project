@@ -5,6 +5,7 @@ provider "aws" {
 # Private bucket for James's site files. Only CloudFront will be allowed to read it (added later)
 resource "aws_s3_bucket" "site" {
   bucket = "nextjs-site-s3"
+  force_destroy = true
 }
 
 # Lock the bucket down explicitly, so the intent is in code and drift gets caught.

@@ -1,10 +1,10 @@
 provider "aws" {
-  region = "eu-west-2"
+  region = var.aws_region
 }
 
 # Private bucket for James's site files. Only CloudFront will be allowed to read it (added later)
 resource "aws_s3_bucket" "site" {
-  bucket        = "nextjs-site-s3"
+  bucket        = var.site_bucket_name
   force_destroy = true
 }
 
@@ -63,12 +63,12 @@ resource "aws_cloudfront_distribution" "site" {
   }
 
   default_cache_behavior {
-    target_origin_id          = "s3-site"
-    viewer_protocol_policy    = "redirect-to-https"
-    allowed_methods           = ["GET", "HEAD"]
-    cached_methods            = ["GET", "HEAD"]
-    compress                  = true
-    cache_policy_id           = "658327ea-f89d-4fab-a63d-7e88639e58f6" # AWS managed: CachingOptimized
+    target_origin_id           = "s3-site"
+    viewer_protocol_policy     = "redirect-to-https"
+    allowed_methods            = ["GET", "HEAD"]
+    cached_methods             = ["GET", "HEAD"]
+    compress                   = true
+    cache_policy_id            = "658327ea-f89d-4fab-a63d-7e88639e58f6" # AWS managed: CachingOptimized
     response_headers_policy_id = "67f7725c-6f97-4210-82d7-5512b31e9d03" # AWS managed: SecurityHeadersPolicy
   }
 
@@ -104,4 +104,30 @@ resource "aws_s3_bucket_policy" "site" {
 }
 output "cloudfront_url" {
   value = "https://${aws_cloudfront_distribution.site.domain_name}"
+}
+
+# Cost guardrail: emails before spend becomes a surprise
+
+resource "aws_budgets_budget" "monthly" {
+  name         = "terraform-portfolio-monthly"
+  budget_type  = "COST"
+  limit_amount = var.monthly_budget_usd
+  limit_unit   = "USD"
+  time_unit    = "MONTHLY"
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 80
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "ACTUAL"
+    subscriber_email_addresses = [var.alert_email]
+  }
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 100
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "FORECASTED"
+    subscriber_email_addresses = [var.alert_email]
+  }
 }

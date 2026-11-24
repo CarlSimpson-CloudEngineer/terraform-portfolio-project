@@ -10,3 +10,15 @@ variable "site_bucket_name" {
   type        = string
   default     = "nextjs-site-s3"
 }
+
+variable "alert_email" {
+  description = "Email for budget alerts. Set in TFvars, never committed"
+  type        = string
+  sensitive   = true
+}
+
+variable "monthly_budget_usd" {
+  description = " Monthly cost budget in usd"
+  type        = string
+  default     = "5"
+}

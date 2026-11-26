@@ -22,3 +22,9 @@ variable "monthly_budget_usd" {
   type        = string
   default     = "5"
 }
+
+variable "github_repo" {
+  description = "GitHub owner/repo allowed to deploy"
+  type        = string
+  default     = "CarlSimpson-CloudEngineer/terraform-portfolio-project"
+}

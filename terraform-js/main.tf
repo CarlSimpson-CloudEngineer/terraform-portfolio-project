@@ -1,8 +1,17 @@
 provider "aws" {
   region = var.aws_region
+
+  default_tags {
+    tags = {
+      Project    = "aws-static-site-terraform"
+      Owner      = "Carl Simpson"
+      ManagedBy  = "Terraform"
+      Repository = "github.com/CarlSimpson-CloudEngineer/aws-static-site-terraform"
+    }
+  }
 }
 
-# Private bucket for James's site files. Only CloudFront will be allowed to read it (added later)
+# Private bucket for the site files. Only CloudFront can read it (via Origin Access Control).
 resource "aws_s3_bucket" "site" {
   #checkov:skip=CKV_AWS_144:No cross-region replication - content rebuilds from GitHub (decision 3)
   #checkov:skip=CKV_AWS_145:SSE-S3 default encryption - KMS adds cost and key policy for CloudFront

@@ -6,7 +6,7 @@ variable "aws_region" {
 }
 
 variable "site_bucket_name" {
-  description = "Gloabally unique name for private site bucket"
+  description = "Globally unique name for private site bucket"
   type        = string
   default     = "nextjs-site-s3"
 }
@@ -26,5 +26,5 @@ variable "monthly_budget_usd" {
 variable "github_repo" {
   description = "GitHub owner@id/repo@id allowed to deploy (immutable OIDC sub format)"
   type        = string
-  default     = "CarlSimpson-CloudEngineer@352863257/terraform-portfolio-project@1466644042"
+  default     = "CarlSimpson-CloudEngineer@352863257/aws-static-site-terraform@1466644042"
 }

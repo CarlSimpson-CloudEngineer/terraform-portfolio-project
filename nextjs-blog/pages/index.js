@@ -1,3 +1,5 @@
+
+
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
 
@@ -11,7 +13,7 @@ export default function Home() {
 
       <main>
         <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
+             Deployed by GitHub Actions. Welcome to <a href="https://nextjs.org">Next.js!</a>
         </h1>
 
         <p className={styles.description}>

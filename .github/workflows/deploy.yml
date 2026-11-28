@@ -56,7 +56,7 @@ jobs:
           SITE="https://${{ vars.CLOUDFRONT_DOMAIN }}/"
           S3="https://${{ env.BUCKET }}.s3.${{ env.AWS_REGION }}.amazonaws.com/index.html"
 
-          headers=$(curl -sSI "$SITE")
+          headers=$(curl -sSI "$SITE") || { echo "Could not reach $SITE"; exit 1; }
           grep -q " 200" <<< "$(head -n 1 <<< "$headers")" || { echo "CloudFront did not return 200"; exit 1; }
           for h in strict-transport-security x-frame-options x-content-type-options referrer-policy x-xss-protection; do
             grep -qi "^$h:" <<< "$headers" || { echo "Missing header: $h"; exit 1; }

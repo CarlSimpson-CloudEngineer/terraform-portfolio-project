@@ -72,6 +72,10 @@ The brief: host a freelance web designer's portfolio site on AWS. The requiremen
 
 **No secrets in the repo.** The deploy role ARN (which contains the account ID) is a GitHub Actions secret. The distribution ID and domain are Actions variables. The alert email lives only in a gitignored `terraform.tfvars`.
 
+**Protected main branch.** A GitHub ruleset requires every change to arrive by pull request with the Terraform checks (fmt, validate, Checkov) passing. Force pushes and deletion are blocked, and the admin keeps a break-glass bypass. Tested: a pull request with badly formatted Terraform was refused with *"the base branch policy prohibits the merge"*.
+
+**Tagged resources.** Terraform `default_tags` label every resource with its project, owner, manager (Terraform) and repository.
+
 **Supply chain.** CI tools are pinned and installed from GitHub's own actions where possible (see [Checkov vs Trivy](#why-checkov-and-not-trivy)).
 
 **Known limitations (accepted for v1):**
@@ -243,6 +247,5 @@ Then set the GitHub Actions secret `AWS_DEPLOY_ROLE_ARN` and the variables `CLOU
 
 1. **Custom domain** (Route 53 + ACM). A stable URL across rebuilds, a TLS 1.2+ minimum, and blue/green cutover via DNS.
 2. **Agree RTO/RPO in writing** as part of a support agreement, which also settles who the alerts go to.
-3. **Branch protection** so the checks are required before merging.
-4. **`terraform plan` on pull requests**, using a separate read-only role.
+3. **`terraform plan` on pull requests**, using a separate read-only role.
 

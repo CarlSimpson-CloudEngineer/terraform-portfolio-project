@@ -6,8 +6,6 @@ on:
     paths:
       - "terraform-js/**"
   pull_request:
-    paths:
-      - "terraform-js/**"
   workflow_dispatch:
 
 permissions:

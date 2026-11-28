@@ -24,7 +24,7 @@ variable "monthly_budget_usd" {
 }
 
 variable "github_repo" {
-  description = "GitHub owner/repo allowed to deploy"
+  description = "GitHub owner@id/repo@id allowed to deploy (immutable OIDC sub format)"
   type        = string
-  default     = "CarlSimpson-CloudEngineer/terraform-portfolio-project"
+  default     = "CarlSimpson-CloudEngineer@352863257/terraform-portfolio-project@1466644042"
 }

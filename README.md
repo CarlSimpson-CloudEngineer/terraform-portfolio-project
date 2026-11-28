@@ -1,6 +1,6 @@
 # Static Website on AWS with Terraform
 
-A client's single-page Next.js portfolio, hosted on a private S3 bucket behind CloudFront and built entirely with Terraform. Deploys run through GitHub Actions with no stored AWS keys, every change is checked for security issues before it reaches `main`, and the live site is tested after every deploy and every morning.
+A single-page Next.js website for a freelance web designer, hosted on a private S3 bucket behind CloudFront and built entirely with Terraform. Deploys run through GitHub Actions with no stored AWS keys, every change is checked for security issues before it reaches `main`, and the live site is tested after every deploy and every morning.
 
 **Live site:** https://d2v841qmb3715d.cloudfront.net
 *(This is the default CloudFront domain, so it changes whenever the stack is rebuilt. See [Disaster recovery](#disaster-recovery).)*
@@ -9,14 +9,14 @@ A client's single-page Next.js portfolio, hosted on a private S3 bucket behind C
 
 ## The brief
 
-A freelance web designer needed his portfolio site hosted on AWS. His requirements were:
+The brief: host a freelance web designer's portfolio site on AWS. The requirements were:
 
 - Highly available, scalable and fast to load worldwide
 - Cost-effective (budget: **$5/month**)
 - Built with infrastructure as code, with all code on GitHub
 - Following security and performance best practice
 
-I treated it as a paying-client engagement: problem first, then requirements, design and only then the technology. Every design choice is recorded with its reason, trade-off and the alternative I rejected.
+
 
 **Assumptions agreed up front:** one static page updated about monthly; low, spiky traffic; a global audience; no forms, logins or personal data in v1; no custom domain in v1.
 

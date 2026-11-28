@@ -27,4 +27,4 @@ variable "github_repo" {
   description = "GitHub owner@id/repo@id allowed to deploy (immutable OIDC sub format)"
   type        = string
   default     = "CarlSimpson-CloudEngineer@352863257/aws-static-site-terraform@1466644042"
-}
+}variable "x" {type=string}

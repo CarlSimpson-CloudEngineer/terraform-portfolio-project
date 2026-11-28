@@ -36,3 +36,14 @@ jobs:
 
       - name: Validate
         run: terraform validate
+
+      - name: Install Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install Checkov
+        run: pip install checkov==3.3.26
+
+      - name: Security scan (report only)
+        run: checkov --directory . --framework terraform --soft-fail  

@@ -45,5 +45,5 @@ jobs:
       - name: Install Checkov
         run: pip install checkov==3.3.26
 
-      - name: Security scan (report only)
+      - name: Security scan 
         run: checkov --directory . --framework terraform

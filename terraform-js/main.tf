@@ -47,7 +47,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "site" {
 resource "aws_cloudfront_origin_access_control" "site" {
   name                              = "nextjs-site-oac"
   origin_access_control_origin_type = "s3"
-  signing_behavior                  = "always"
+  signing_behaviour                  = "always"
   signing_protocol                  = "sigv4"
 }
 

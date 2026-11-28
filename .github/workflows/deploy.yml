@@ -49,3 +49,19 @@ jobs:
 
       - name: Clear the CloudFront cache
         run: aws cloudfront create-invalidation --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+
+      - name: Smoke test the live site
+        run: |
+          set -euo pipefail
+          SITE="https://${{ vars.CLOUDFRONT_DOMAIN }}/"
+          S3="https://${{ env.BUCKET }}.s3.${{ env.AWS_REGION }}.amazonaws.com/index.html"
+
+          headers=$(curl -sSI "$SITE")
+          grep -q " 200" <<< "$(head -n 1 <<< "$headers")" || { echo "CloudFront did not return 200"; exit 1; }
+          for h in strict-transport-security x-frame-options x-content-type-options referrer-policy x-xss-protection; do
+            grep -qi "^$h:" <<< "$headers" || { echo "Missing header: $h"; exit 1; }
+          done
+
+          code=$(curl -s -o /dev/null -w "%{http_code}" "$S3")
+          [ "$code" = "403" ] || { echo "Direct S3 returned $code, expected 403"; exit 1; }
+          echo "Smoke test passed"

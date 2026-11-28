@@ -1,0 +1,38 @@
+name: Terraform checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "terraform-js/**"
+  pull_request:
+    paths:
+      - "terraform-js/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform-js
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v6
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.17.2
+
+      - name: Check formatting
+        run: terraform fmt -check -recursive
+
+      - name: Initialise (no backend, no AWS)
+        run: terraform init -backend=false -input=false
+
+      - name: Validate
+        run: terraform validate

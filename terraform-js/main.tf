@@ -4,6 +4,10 @@ provider "aws" {
 
 # Private bucket for James's site files. Only CloudFront will be allowed to read it (added later)
 resource "aws_s3_bucket" "site" {
+  #checkov:skip=CKV_AWS_144:No cross-region replication - content rebuilds from GitHub (decision 3)
+  #checkov:skip=CKV_AWS_145:SSE-S3 default encryption - KMS adds cost and key policy for CloudFront
+  #checkov:skip=CKV_AWS_18:No access logging - CloudFront is the only reader
+  #checkov:skip=CKV2_AWS_62:No event notifications - nothing reacts to uploads
   bucket        = var.site_bucket_name
   force_destroy = true
 }
@@ -38,6 +42,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "site" {
     noncurrent_version_expiration {
       noncurrent_days = 30
     }
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
   }
 
   depends_on = [aws_s3_bucket_versioning.site]
@@ -53,6 +61,14 @@ resource "aws_cloudfront_origin_access_control" "site" {
 
 # Global CDN in front of the private bucket: HTTPS for visitors, files cached at edge locations.
 resource "aws_cloudfront_distribution" "site" {
+  #checkov:skip=CKV_AWS_310:No origin failover - site rebuilds from code (decision 3)
+  #checkov:skip=CKV_AWS_68:No WAF - nothing to protect, cost exceeds budget (checklist 5)
+  #checkov:skip=CKV2_AWS_47:No WAF and no Java backend (Log4j rule)
+  #checkov:skip=CKV_AWS_174:Default cloudfront.net cert forces TLSv1 - needs custom domain
+  #checkov:skip=CKV2_AWS_42:No custom domain in v1
+  #checkov:skip=CKV_AWS_374:Global audience - no geo restriction
+  #checkov:skip=CKV2_AWS_32:False positive - managed SecurityHeadersPolicy attached by ID (decision 11)
+  #checkov:skip=CKV_AWS_86:No access logging - extra bucket and cost, no one reviewing logs
   enabled             = true
   default_root_object = "index.html"
 
